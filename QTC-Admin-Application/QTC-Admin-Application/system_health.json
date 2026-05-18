@@ -1,0 +1,15 @@
+{
+  "timestamp": "5/1/2026 2:20:07 PM",
+  "cpu_usage": 1.3299489,
+  "memory_usage": 0.43468356,
+  "api_status": "UP",
+  "logins_last_hour": 0,
+  "failed_logins": 0,
+  "database_connection_error": true,
+  "authentication_error": false,
+  "slow_query_detected": false,
+  "alerts": [
+    "ALERT: Database connection failure detected.",
+    "ALERT: No logins detected in the last hour."
+  ]
+}

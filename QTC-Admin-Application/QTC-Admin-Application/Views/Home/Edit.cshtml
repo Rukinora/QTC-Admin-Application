@@ -1,0 +1,126 @@
+@model QTC_Admin_Application.Models.Workflow
+
+@{
+    ViewData["Title"] = "Edit Workflow";
+}
+
+<div class="container mt-4" style="max-width: 700px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 style="color: #6f42c1;">Edit Workflow</h3>
+            <p class="text-muted mb-0">Update workflow details</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">← Back</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="WorkflowId" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="WorkflowName" class="form-label fw-bold">Workflow Name <span class="text-danger">*</span></label>
+                    <input asp-for="WorkflowName" class="form-control" maxlength="200" />
+                    <span asp-validation-for="WorkflowName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="WorkflowType" class="form-label fw-bold">Description <span class="text-danger">*</span></label>
+                    <input asp-for="WorkflowType" class="form-control" maxlength="200" />
+                    <span asp-validation-for="WorkflowType" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="RecordLimit" class="form-label fw-bold">Record Limit <span class="text-danger">*</span></label>
+                    <input asp-for="RecordLimit" type="number" class="form-control" />
+                    <span asp-validation-for="RecordLimit" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="SubStatusId" class="form-label fw-bold">Sub Status ID</label>
+                    <input asp-for="SubStatusId" type="number" class="form-control" />
+                    <span asp-validation-for="SubStatusId" class="text-danger"></span>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-muted">Created By</label>
+                        <input type="text" class="form-control" value="@Model.CreatedBy" disabled />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-muted">Created Date</label>
+                        <input type="text" class="form-control" value="@Model.CreatedDate.ToString("MM/dd/yyyy HH:mm")" disabled />
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                    <button type="button" class="btn btn-outline-warning" id="undoChangesBtn" disabled>
+                        <i class="bi bi-arrow-counterclockwise"></i> Undo Changes
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        (function () {
+            const fieldIds = ["WorkflowName", "WorkflowType", "RecordLimit", "SubStatusId"];
+            const originalValues = {};
+
+            const getField = (id) => document.getElementById(id);
+            const normalize = (value) => (value ?? "").toString().trim();
+
+            fieldIds.forEach(id => {
+                const el = getField(id);
+                if (el) originalValues[id] = el.value;
+            });
+
+            const undoBtn = document.getElementById("undoChangesBtn");
+            if (!undoBtn) return;
+
+            function hasChanges() {
+                return fieldIds.some(id => {
+                    const el = getField(id);
+                    if (!el || !Object.prototype.hasOwnProperty.call(originalValues, id)) return false;
+                    return normalize(el.value) !== normalize(originalValues[id]);
+                });
+            }
+
+            function syncUndoButtonState() {
+                undoBtn.disabled = !hasChanges();
+            }
+
+            fieldIds.forEach(id => {
+                const el = getField(id);
+                if (!el) return;
+
+                el.addEventListener("input", syncUndoButtonState);
+                el.addEventListener("change", syncUndoButtonState);
+            });
+
+            undoBtn.addEventListener("click", function () {
+                fieldIds.forEach(id => {
+                    const el = getField(id);
+                    if (el && Object.prototype.hasOwnProperty.call(originalValues, id)) {
+                        el.value = originalValues[id];
+                        el.dispatchEvent(new Event("change", { bubbles: true }));
+                    }
+                });
+
+                syncUndoButtonState();
+            });
+
+            syncUndoButtonState();
+        })();
+    </script>
+}

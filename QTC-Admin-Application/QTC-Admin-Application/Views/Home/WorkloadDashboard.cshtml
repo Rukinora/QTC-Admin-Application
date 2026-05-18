@@ -1,0 +1,122 @@
+@model QTC_Admin_Application.Models.WorkloadDashboardViewModel
+
+@{
+    ViewData["Title"] = "Team Workload Dashboard";
+}
+
+<div class="container mt-4">
+    <h3 style="color: #6f42c1;"><i class="bi bi-people"></i> Team Workload Dashboard</h3>
+    <div class="mb-3">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Workflows
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">User Active Workload</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table mb-0 table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>User</th>
+                        <th>Active Task Count</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var user in Model.Users)
+                {
+                    var overloaded = user.TaskCount > 10;
+                    <tr style="@(overloaded ? "background-color:#fff3f3;" : "")">
+                        <td class="fw-bold">@user.UserName</td>
+                        <td>@user.TaskCount</td>
+                        <td>
+                            @if (overloaded)
+                            {
+                                <span class="badge bg-danger">Overloaded</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">OK</span>
+                            }
+                        </td>
+                        <td>
+                            @if (user.TaskCount > 0)
+                            {
+                                <a asp-action="WorkloadDashboard" asp-route-selectedUserName="@user.UserName" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> View Tasks
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.SelectedUserName))
+    {
+        <h4 class="mt-5 mb-3">Active Tasks for <span class="text-primary">@Model.SelectedUserName</span></h4>
+
+        <div class="card shadow-sm border-info">
+            <div class="card-body p-0">
+                @if (Model.SelectedUserTasks.Any())
+                {
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-info">
+                            <tr>
+                                <th>Item Key</th>
+                                <th>Workflow Name</th>
+                                <th>Step Name</th>
+                                <th>Status</th>
+                                <th>Last Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var task in Model.SelectedUserTasks)
+                        {
+                            <tr>
+                                <td><span class="text-secondary">@task.ItemKey</span></td>
+                                <td class="fw-bold">@task.WorkflowName</td>
+                                <td>@task.StepName</td>
+                                <td>
+                                    <span class="badge @(task.StatusName == "Pending" ? "bg-secondary" : "bg-warning text-dark")">
+                                        @task.StatusName
+                                    </span>
+                                </td>
+                                <td class="small">@task.UpdatedDate.ToString("g")</td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@task.WorkflowId" class="btn btn-sm btn-outline-dark" title="Manage Workflow">
+                                        <i class="bi bi-gear"></i> Manage
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="alert alert-info m-0 border-0 rounded-0">
+                        <i class="bi bi-info-circle"></i> This user has no active assigned tasks.
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

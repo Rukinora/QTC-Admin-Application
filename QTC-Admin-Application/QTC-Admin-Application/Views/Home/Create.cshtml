@@ -1,0 +1,60 @@
+@model QTC_Admin_Application.Models.Workflow
+
+@{
+    ViewData["Title"] = "Create Workflow";
+}
+
+<div class="container mt-4" style="max-width: 700px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 style="color: #6f42c1;">Create New Workflow</h3>
+            <p class="text-muted mb-0">Define a new workflow for your organization</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">← Back</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="WorkflowName" class="form-label fw-bold">Workflow Name <span class="text-danger">*</span></label>
+                    <input asp-for="WorkflowName" class="form-control" placeholder="e.g., Customer Onboarding Process" maxlength="200" />
+                    <span asp-validation-for="WorkflowName" class="text-danger"></span>
+                    <small class="form-text text-muted">Must be unique across all workflows (max 200 chars)</small>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="WorkflowType" class="form-label fw-bold">Description <span class="text-danger">*</span></label>
+                    <input asp-for="WorkflowType" class="form-control" placeholder="e.g., Manual, Automated, Hybrid" maxlength="200" />
+                    <span asp-validation-for="WorkflowType" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="RecordLimit" class="form-label fw-bold">Record Limit <span class="text-danger">*</span></label>
+                    <input asp-for="RecordLimit" type="number" class="form-control" value="100" />
+                    <span asp-validation-for="RecordLimit" class="text-danger"></span>
+                    <small class="form-text text-muted">Maximum number of active records (default: 100)</small>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="SubStatusId" class="form-label fw-bold">Sub Status ID</label>
+                    <input asp-for="SubStatusId" type="number" class="form-control" />
+                    <span asp-validation-for="SubStatusId" class="text-danger"></span>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Create Workflow
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

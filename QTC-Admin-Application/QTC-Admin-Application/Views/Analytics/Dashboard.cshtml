@@ -1,0 +1,57 @@
+﻿@{
+    ViewData["Title"] = "Investor Dashboard";
+}
+
+<h2>Investor Dashboard</h2>
+
+<div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+    <div style="border: 1px solid #ccc; padding: 1rem; border-radius: 8px; min-width: 150px;">
+        <h4>Total Workflows</h4>
+        <p style="font-size: 2rem; margin: 0;">@ViewBag.TotalWorkflows</p>
+    </div>
+    <div style="border: 1px solid #ccc; padding: 1rem; border-radius: 8px; min-width: 150px;">
+        <h4>Completion Rate</h4>
+        <p style="font-size: 2rem; margin: 0;">@ViewBag.CompletionRate%</p>
+    </div>
+</div>
+
+<h3>Workflows Created Per Month</h3>
+<canvas id="workflowsChart" width="600" height="300"></canvas>
+
+<h3>Completion Rate</h3>
+<canvas id="completionChart" width="300" height="300"></canvas>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const workflowData = @Html.Raw(ViewBag.WorkflowsByMonth);
+
+        new Chart(document.getElementById('workflowsChart'), {
+        type: 'bar',
+        data: {
+        labels: workflowData.map(d => d.Month),
+        datasets: [{
+        label: 'Workflows Created',
+        data: workflowData.map(d => d.Count),
+        backgroundColor: 'rgba(54, 162, 235, 0.6)'
+        }]
+        },
+        options: {
+        responsive: false,
+        scales: { y: { beginAtZero: true } }
+        }
+        });
+
+        new Chart(document.getElementById('completionChart'), {
+        type: 'doughnut',
+        data: {
+        labels: ['Completed', 'Incomplete'],
+        datasets: [{
+        data: [@ViewBag.CompletionRate, @(100 - ViewBag.CompletionRate)],
+        backgroundColor: ['rgba(75, 192, 92, 0.6)', 'rgba(255, 99, 132, 0.6)']
+        }]
+        },
+        options: { responsive: false }
+        });
+    </script>
+}

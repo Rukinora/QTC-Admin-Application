@@ -1,0 +1,91 @@
+@model QTC_Admin_Application.Models.WorkflowStep
+
+@{
+    ViewData["Title"] = "Create Workflow Step";
+    var workflowName = ViewData["WorkflowName"]?.ToString() ?? "Workflow";
+}
+
+<div class="container mt-4" style="max-width: 700px;">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Workflows</a></li>
+            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.WorkflowId">@workflowName</a></li>
+            <li class="breadcrumb-item active" aria-current="page">New Step</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 style="color: #6f42c1;">Create New Workflow Step</h3>
+            <p class="text-muted mb-0">Add a step to <strong>@workflowName</strong></p>
+        </div>
+        <a asp-action="Details" asp-route-id="@Model.WorkflowId" class="btn btn-outline-secondary">← Back</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-action="CreateStep" method="post">
+                <input type="hidden" asp-for="WorkflowId" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="StepName" class="form-label fw-bold">Step Name <span class="text-danger">*</span></label>
+                    <input asp-for="StepName" class="form-control" placeholder="e.g., Approval Review" maxlength="200" />
+                    <span asp-validation-for="StepName" class="text-danger"></span>
+                    <small class="form-text text-muted">Must be unique within this workflow (max 200 chars)</small>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="StepDesc" class="form-label fw-bold">Step Description</label>
+                    <textarea asp-for="StepDesc" class="form-control" rows="3" placeholder="Describe what happens in this step..." maxlength="500"></textarea>
+                    <span asp-validation-for="StepDesc" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Sequence" class="form-label fw-bold">Sequence <span class="text-danger">*</span></label>
+                        <input asp-for="Sequence" type="number" class="form-control" />
+                        <span asp-validation-for="Sequence" class="text-danger"></span>
+                        <small class="form-text text-muted">Order in which this step executes</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="StepType" class="form-label fw-bold">Step Type <span class="text-danger">*</span></label>
+                        <select asp-for="StepType" class="form-select">
+                            <option value="">-- Select Type --</option>
+                            <option value="Manual">Manual</option>
+                            <option value="Automated">Automated</option>
+                            <option value="Approval">Approval</option>
+                            <option value="Notification">Notification</option>
+                        </select>
+                        <span asp-validation-for="StepType" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Enabled <span class="text-danger">*</span></label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" asp-for="Enabled" value="Y" id="enabledYes" checked />
+                            <label class="form-check-label" for="enabledYes">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" asp-for="Enabled" value="N" id="enabledNo" />
+                            <label class="form-check-label" for="enabledNo">No</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a asp-action="Details" asp-route-id="@Model.WorkflowId" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Create Step
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

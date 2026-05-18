@@ -1,0 +1,202 @@
+﻿@model List<QTC_Admin_Application.Models.Workflow>
+
+@{
+    ViewData["Title"] = "Home Page";
+    var role = Context.Session.GetString("Role");
+    bool isAdmin = role == "Admin";
+    var currentPage = Convert.ToInt32(ViewData["CurrentPage"] ?? 1);
+    var totalPages = Convert.ToInt32(ViewData["TotalPages"] ?? 1);
+    var totalCount = Convert.ToInt32(ViewData["TotalCount"] ?? 0);
+    var workflowStatuses = ViewData["WorkflowStatuses"] as Dictionary<int, string> ?? new Dictionary<int, string>();
+}
+
+<div class="container mt-4">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <h3 style="color: #6f42c1">Workflow Management</h3>
+    <p class="text-muted mb-1">Manage and monitor all workflow processes</p>
+    <p class="text-muted" style="font-size: 0.95rem;">
+        Use this page to search, create, view, and edit workflows.
+    </p>
+
+    <form method="get" asp-action="Index" class="mb-3">
+        <div class="d-flex justify-content-between">
+            <div class="d-flex gap-2 flex-grow-1 me-3">
+                <input type="text"
+                       name="search"
+                       class="form-control"
+                       placeholder="Search workflows by name..."
+                       value="@ViewData["CurrentSearch"]"
+                       style="max-width: 400px;" />
+
+                <select name="sort" class="form-select" style="max-width: 200px;" onchange="this.form.submit()">
+                    <option value="">Name A-Z</option>
+                    <option value="name_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "name_desc")">Name Z-A</option>
+                    <option value="date" selected="@(ViewData["CurrentSort"]?.ToString() == "date")">Oldest First</option>
+                    <option value="date_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "date_desc")">Newest First</option>
+                </select>
+
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i> Search
+                </button>
+
+                @if (!string.IsNullOrWhiteSpace(ViewData["CurrentSearch"]?.ToString()))
+                {
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </a>
+                }
+            </div>
+
+            @if (isAdmin)
+            {
+                <a asp-action="Create" class="btn btn-primary" style="background-color: #6f42c1; border-color: #6f42c1;">
+                    <i class="bi bi-plus-circle"></i> Create New Workflow
+                </a>
+            }
+        </div>
+    </form>
+
+    @if (!string.IsNullOrWhiteSpace(ViewData["CurrentSearch"]?.ToString()))
+    {
+        <div class="alert alert-info d-flex align-items-center" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            <div>
+                Showing <strong>@Model.Count</strong> of <strong>@totalCount</strong> result(s) for "<strong>@ViewData["CurrentSearch"]</strong>"
+            </div>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th style="width: 220px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                            <p class="mt-2">No workflows found. @(isAdmin ? "Create your first workflow to get started!" : "")</p>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var wf in Model)
+                    {
+                        var status = workflowStatuses.TryGetValue(wf.WorkflowId, out var s) ? s : "New";
+                        <tr>
+                            <td class="text-primary fw-bold">@wf.WorkflowName</td>
+                            <td class="text-break" style="max-width: 360px;">
+                                @if (!string.IsNullOrWhiteSpace(wf.WorkflowType))
+                                {
+                                    @wf.WorkflowType
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (status == "Completed")
+                                {
+                                    <span class="badge bg-success">Completed</span>
+                                }
+                                else if (status == "In Progress")
+                                {
+                                    <span class="badge bg-warning text-dark">In Progress</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">New</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    @if (isAdmin)
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@wf.WorkflowId" class="btn btn-sm btn-outline-primary" title="Edit Workflow">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@wf.WorkflowId" class="btn btn-sm btn-outline-secondary" title="View Steps">
+                                            <i class="bi bi-eye"></i> View Steps
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">View Only</span>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3 text-muted">
+        <div>
+            <small>Displaying @(Model?.Count ?? 0) of @totalCount workflow(s)</small>
+        </div>
+        <div>
+            <small>Page @currentPage of @totalPages</small>
+        </div>
+    </div>
+
+    @if (totalPages > 1)
+    {
+        <nav class="mt-2" aria-label="Workflow pagination">
+            <ul class="pagination justify-content-end mb-0">
+                <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-search="@ViewData["CurrentSearch"]"
+                       asp-route-sort="@ViewData["CurrentSort"]"
+                       asp-route-page="@(currentPage - 1)">Previous</a>
+                </li>
+
+                @for (var p = 1; p <= totalPages; p++)
+                {
+                    <li class="page-item @(p == currentPage ? "active" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-search="@ViewData["CurrentSearch"]"
+                           asp-route-sort="@ViewData["CurrentSort"]"
+                           asp-route-page="@p">@p</a>
+                    </li>
+                }
+
+                <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-search="@ViewData["CurrentSearch"]"
+                       asp-route-sort="@ViewData["CurrentSort"]"
+                       asp-route-page="@(currentPage + 1)">Next</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>

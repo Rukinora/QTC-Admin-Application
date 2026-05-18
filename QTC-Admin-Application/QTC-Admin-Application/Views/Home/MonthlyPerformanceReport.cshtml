@@ -1,0 +1,94 @@
+@model QTC_Admin_Application.Models.MonthlyPerformanceReport
+
+@{
+    ViewData["Title"] = "Monthly Performance Report";
+}
+
+<div class="container mt-4">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 style="color: #6f42c1;">Monthly Performance Report</h3>
+            <p class="text-muted mb-0">High-level workflow completion and pending metrics</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">? Back</a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="MonthlyPerformanceReport" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="fromDate" class="form-label">From Date</label>
+                    <input type="date" id="fromDate" name="fromDate" class="form-control"
+                           value="@(Model.FromDate.HasValue ? Model.FromDate.Value.ToString("yyyy-MM-dd") : "")" />
+                </div>
+
+                <div class="col-md-3">
+                    <label for="toDate" class="form-label">To Date</label>
+                    <input type="date" id="toDate" name="toDate" class="form-control"
+                           value="@(Model.ToDate.HasValue ? Model.ToDate.Value.ToString("yyyy-MM-dd") : "")" />
+                </div>
+
+                <div class="col-md-6 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary" style="background-color: #6f42c1; border-color: #6f42c1;">
+                        <i class="bi bi-bar-chart"></i> Generate Report
+                    </button>
+                    <a asp-action="MonthlyPerformanceReport" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <a asp-action="ExportMonthlyPerformanceReport"
+           asp-route-format="csv"
+           asp-route-fromDate="@(Model.FromDate?.ToString("yyyy-MM-dd"))"
+           asp-route-toDate="@(Model.ToDate?.ToString("yyyy-MM-dd"))"
+           class="btn btn-success me-2">
+            <i class="bi bi-filetype-csv"></i> Download CSV
+        </a>
+
+        <a asp-action="ExportMonthlyPerformanceReport"
+           asp-route-format="pdf"
+           asp-route-fromDate="@(Model.FromDate?.ToString("yyyy-MM-dd"))"
+           asp-route-toDate="@(Model.ToDate?.ToString("yyyy-MM-dd"))"
+           class="btn btn-danger">
+            <i class="bi bi-filetype-pdf"></i> Download PDF
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Report Summary</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-bordered mb-0">
+                <tr>
+                    <th style="width: 320px;">Total Workflows Created</th>
+                    <td>@Model.TotalWorkflowsCreated</td>
+                </tr>
+                <tr>
+                    <th>Total Workflows Completed</th>
+                    <td>@Model.TotalWorkflowsCompleted</td>
+                </tr>
+                <tr>
+                    <th>Total Workflows Pending</th>
+                    <td>@Model.TotalWorkflowsPending</td>
+                </tr>
+                <tr>
+                    <th>Average Completion Days</th>
+                    <td>@Model.AverageCompletionDays</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
